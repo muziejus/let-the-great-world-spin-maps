@@ -10,6 +10,8 @@
 /test/version_tmp/
 /tmp/
 
+/public/vendor
+
 # Used by dotenv library to load environment variables.
 # .env
 
