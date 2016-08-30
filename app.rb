@@ -4,6 +4,6 @@ require "httparty"
 
 get "/" do
   json = HTTParty.get("http://nywalker.newyorkscapes.org/books/let-the-great-world-spin-2009/geojson-instances").body
-  erb :index, locals: { json: json }
+  erb :index, locals: { geo_json: json }
 end
 
