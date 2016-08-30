@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Turf.js test</title>
+    <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+    <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+		<script src="/vendor/MovingMarker.js"></script>
+    <script src="/vendor/turf.min.js"></script>
+    <script src="/ciaran.geo.json"></script>
+    <style>
+      #map { height: 600px; }
+    </style>
+  </head>
+  <body>
+    <h1>Five instance rolling average (blue) and cumulative average of instances in the Ciaran section of <em>Let the Great World Spin</em></h1>
+		<h2>The two markers show the changes in the averages over narrative time.</h2>
+    <div id="map"></div>
+
+    <script>
+
+			var geojsonMarkerOptions = {
+				radius: 8,
+				fillColor: "#adaada",
+				color: "#666",
+				weight: 1,
+				opacity: 0.8,
+				fillOpacity: 0.5
+			};
+
+      var averageMarkerOptions = {
+				radius: 4,
+				fillColor: "#7800ff",
+				color: "#666",
+				weight: 1,
+				opacity: 0.8,
+				fillOpacity: 0.5
+			};
+
+
+      var map = L.map('map').setView([40, -6], 3);
+      L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+
+      var step;
+      var ciaranRollingLineCoordinates = [];
+      var ciaranRollingLatLng = []
+      var ciaranPointsAccumulating = [ciaranPoints[0], ciaranPoints[1], ciaranPoints[2], ciaranPoints[3]];
+      var ciaranAccumulatorCoordinates = [];
+			var ciaranAccumulatorLatLng = []
+      var ciaranAccumulatorPoints = []
+      for (step = 4; step < ciaranPoints.length; step++){
+        var rollingCenter = turf.centroid({"type": "FeatureCollection", "features": [ ciaranPoints[step - 4], ciaranPoints[step - 3], ciaranPoints[step - 2], ciaranPoints[step - 1], ciaranPoints[step] ] } );
+        ciaranRollingLineCoordinates.push(rollingCenter.geometry.coordinates);
+        ciaranRollingLatLng.push([rollingCenter.geometry.coordinates[1], rollingCenter.geometry.coordinates[0]]);
+        ciaranPointsAccumulating.push(ciaranPoints[step]);
+        var accumulatingCenter = turf.centroid({"type": "FeatureCollection", "features": ciaranPointsAccumulating});
+        ciaranAccumulatorCoordinates.push(accumulatingCenter.geometry.coordinates);
+        ciaranAccumulatorLatLng.push([accumulatingCenter.geometry.coordinates[1], accumulatingCenter.geometry.coordinates[0]]);
+        ciaranAccumulatorPoints.push(accumulatingCenter);
+        L.geoJson(accumulatingCenter, {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, averageMarkerOptions);
+          }
+        }).addTo(map);
+        L.geoJson(ciaranPoints[step], {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+          }
+        }).addTo(map);
+        var line = {"type": "LineString", "coordinates": [ciaranPoints[step].geometry.coordinates, accumulatingCenter.geometry.coordinates]};
+        L.geoJson(line, {style: {"color": "#666", "weight": 3, "opacity": 0.4}}).addTo(map);
+      };
+      var rollingLine = {"type": "LineString", "coordinates": ciaranRollingLineCoordinates};
+      var accumulatingLine = {"type": "LineString", "coordinates": ciaranAccumulatorCoordinates};
+      var accumulatingPoints = {"type": "FeatureCollection", "features": ciaranAccumulatorPoints};
+      L.geoJson(rollingLine, {style: {"weight": 2, "opacity": 0.65}}).addTo(map);
+      L.geoJson(accumulatingLine, {style: {"color": "#7800ff", "weight": 3, "opacity": 0.75}}).addTo(map);
+      var animationSteps = []
+      for (step = 0; step < ciaranAccumulatorLatLng.length; step++){
+        animationSteps.push(100);
+      }
+			L.Marker.movingMarker(ciaranAccumulatorLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
+			L.Marker.movingMarker(ciaranRollingLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
+
+    </script>
+
+    <p>Geographical calculations done with the suprisingly flexible and
+      friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
+      Animated markers courtesy of Leaflet’s <a
+        href="https://github.com/ewoken/Leaflet.MovingMarker"
+        target="_blank">MovingMarker</a> extension. Data is by Moacir P. de Sá
+      Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
+        target="_blank">NYWalker</a>. The faint circles represent instances
+      mentioned in the text, and each is connected to a line segment on the
+      cumulative line by a faint grey line.</p>
+    
+      <p>This is part of an instance of “everyday criticism.” Experimentation
+        is part of everyday criticism, and this was easier and more fun than
+        fighting with python and ArcGIS.</p>
+
+  </body>
+</html>
