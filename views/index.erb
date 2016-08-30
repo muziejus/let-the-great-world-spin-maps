@@ -1,6 +1,8 @@
+<%# encoding: UTF-8 %>
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>Turf.js test</title>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -12,7 +14,7 @@
     <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
 		<script src="/vendor/MovingMarker.js"></script>
     <script src="/vendor/turf.min.js"></script>
-    <script src="/ciaran.geo.json"></script>
+    <!--    <script src="/ciaran.geo.json"></script> -->
     <style>
       #map { height: 600px; }
     </style>
@@ -23,6 +25,7 @@
     <div id="map"></div>
 
     <script>
+      var ciaranPoints = <%= geo_json %>;
 
 			var geojsonMarkerOptions = {
 				radius: 8,
@@ -95,15 +98,15 @@
 
     <p>Geographical calculations done with the suprisingly flexible and
       friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
-      Animated markers courtesy of Leaflet’s <a
+      Animated markers courtesy of Leaflet&rsquo;s <a
         href="https://github.com/ewoken/Leaflet.MovingMarker"
-        target="_blank">MovingMarker</a> extension. Data is by Moacir P. de Sá
+        target="_blank">MovingMarker</a> extension. Data is by Moacir P. de S&aacute;
       Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
         target="_blank">NYWalker</a>. The faint circles represent instances
       mentioned in the text, and each is connected to a line segment on the
       cumulative line by a faint grey line.</p>
     
-      <p>This is part of an instance of “everyday criticism.” Experimentation
+      <p>This is part of an instance of &ldquo;everyday criticism.&rdquo; Experimentation
         is part of everyday criticism, and this was easier and more fun than
         fighting with python and ArcGIS.</p>
 
