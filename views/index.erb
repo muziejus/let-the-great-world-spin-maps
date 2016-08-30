@@ -1,4 +1,4 @@
-<%# encoding: UTF-8 %>
+<%# encoding: utf-8 %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -57,9 +57,22 @@
       }).addTo(map);
 
       var allPointsGeoJSON = <%= geo_json %>;
-
-      var ciaranPoints = getSpecialPoints(allPointsGeoJSON, "ciaran");
-      //var ciaranPoints = <%# instances["ciaran"] %>;
+      <% ["ciaran"].each do |special| #specials.each do |special| %>
+        var <%= special.sub(/ /, "") %>Points = getSpecialPoints(allPointsGeoJSON, "<%= special %>");
+        //var <%= special.sub(/ /, "") %>RunningPoints = getRunningPoints(<%= special.sub(/ /, "") %>Points);
+        //var <%= special.sub(/ /, "") %>RunningLine = getRunningLine(<%= special.sub(/ /, "") %>Points);
+        var <%= special.sub(/ /, "") %>AccumulatorPoints = getAccumulatorPoints(<%= special.sub(/ /, "") %>Points);
+        var <%= special.sub(/ /, "") %>AccumulatorLine = getAccumulatorLine(<%= special.sub(/ /, "") %>Points);
+        L.geoJson(<%= special.sub(/ /, "") %>AccumulatorLine, {style: {"color": "#7800ff", "weight": 3, "opacity": 0.75}}).addTo(map);
+        L.geoJson(<%= special.sub(/ /, "") %>AccumulatorPoints, {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, averageMarkerOptions);
+          },
+          onEachFeature: function(feature, layer) {
+            layer.bindPopup(feature.popup);
+          }
+        }).addTo(map);
+      <% end %>
 
       var step;
       var ciaranRollingLineCoordinates = [];
@@ -77,7 +90,7 @@
         ciaranAccumulatorCoordinates.push(accumulatingCenter.geometry.coordinates);
         ciaranAccumulatorLatLng.push([accumulatingCenter.geometry.coordinates[1], accumulatingCenter.geometry.coordinates[0]]);
         ciaranAccumulatorPoints.push(accumulatingCenter);
-        L.geoJson(accumulatingCenter, {
+        /*L.geoJson(accumulatingCenter, {
           pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng, averageMarkerOptions);
           }
@@ -87,20 +100,20 @@
             return L.circleMarker(latlng, geojsonMarkerOptions);
           }
         }).addTo(map);
+        */
         var line = {"type": "LineString", "coordinates": [ciaranPoints[step].geometry.coordinates, accumulatingCenter.geometry.coordinates]};
-        L.geoJson(line, {style: {"color": "#666", "weight": 3, "opacity": 0.4}}).addTo(map);
+        //L.geoJson(line, {style: {"color": "#666", "weight": 3, "opacity": 0.4}}).addTo(map);
       };
       var rollingLine = {"type": "LineString", "coordinates": ciaranRollingLineCoordinates};
       var accumulatingLine = {"type": "LineString", "coordinates": ciaranAccumulatorCoordinates};
-      var accumulatingPoints = {"type": "FeatureCollection", "features": ciaranAccumulatorPoints};
-      L.geoJson(rollingLine, {style: {"weight": 2, "opacity": 0.65}}).addTo(map);
-      L.geoJson(accumulatingLine, {style: {"color": "#7800ff", "weight": 3, "opacity": 0.75}}).addTo(map);
+      //var accumulatingPoints = {"type": "FeatureCollection", "features": ciaranAccumulatorPoints};
+      //L.geoJson(rollingLine, {style: {"weight": 2, "opacity": 0.65}}).addTo(map);
       var animationSteps = []
       for (step = 0; step < ciaranAccumulatorLatLng.length; step++){
         animationSteps.push(100);
       }
-			L.Marker.movingMarker(ciaranAccumulatorLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
-			L.Marker.movingMarker(ciaranRollingLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
+			//L.Marker.movingMarker(ciaranAccumulatorLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
+			//L.Marker.movingMarker(ciaranRollingLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
 
     </script>
 
