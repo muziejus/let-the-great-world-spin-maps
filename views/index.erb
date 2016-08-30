@@ -31,8 +31,6 @@
          points.features.forEach(function(item, index){
            if(item.properties.special === specialText){
              returnPoints.push(item);
-           } else {
-             console.log("Special was: " + item.properties.special);
            }
          });
         return returnPoints;
@@ -41,6 +39,7 @@
       var allPointsGeoJSON = <%= geo_json %>;
 
       var ciaranPoints = getSpecialPoints(allPointsGeoJSON, "ciaran");
+      //var ciaranPoints = <%# instances["ciaran"] %>;
 
 			var geojsonMarkerOptions = {
 				radius: 8,
