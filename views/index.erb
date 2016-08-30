@@ -3,69 +3,63 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Turf.js test</title>
-    <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
-    <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
-		<script src="/vendor/MovingMarker.js"></script>
-    <script src="/vendor/turf.min.js"></script>
-    <!--    <script src="/ciaran.geo.json"></script> -->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
     <style>
       #map { height: 600px; }
     </style>
   </head>
   <body>
-    <h1>Five instance rolling average (blue) and cumulative average of instances in the Ciaran section of <em>Let the Great World Spin</em></h1>
-		<h2>The two markers show the changes in the averages over narrative time.</h2>
-    <div id="map"></div>
+    <div class="container">
+      <h1>Five instance rolling average (blue) and cumulative average of instances in the Ciaran section of <em>Let the Great World Spin</em></h1>
+      <h2>The two markers show the changes in the averages over narrative time.</h2>
+      <div id="map"></div>
+      <p>Geographical calculations done with the suprisingly flexible and
+        friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
+        Animated markers courtesy of Leaflet&rsquo;s <a
+          href="https://github.com/ewoken/Leaflet.MovingMarker"
+          target="_blank">MovingMarker</a> extension. Data is by Moacir P. de S&aacute;
+        Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
+          target="_blank">NYWalker</a>. The faint circles represent instances
+        mentioned in the text, and each is connected to a line segment on the
+        cumulative line by a faint grey line.</p>
+    
+      <p>This is part of an instance of &ldquo;everyday criticism.&rdquo; Experimentation
+        is part of everyday criticism, and this was easier and more fun than
+        fighting with python and ArcGIS.</p>
+    </div>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+		<script src="/vendor/MovingMarker.js"></script>
+    <script src="/vendor/turf.min.js"></script>
+    <script src="/app.js"></script>
 
     <script>
-      function getSpecialPoints(points, specialText){
-         var returnPoints = [];
-         points.features.forEach(function(item, index){
-           if(item.properties.special === specialText){
-             returnPoints.push(item);
-           }
-         });
-        return returnPoints;
-      };
-
-      var allPointsGeoJSON = <%= geo_json %>;
-
-      var ciaranPoints = getSpecialPoints(allPointsGeoJSON, "ciaran");
-      //var ciaranPoints = <%# instances["ciaran"] %>;
-
-			var geojsonMarkerOptions = {
-				radius: 8,
-				fillColor: "#adaada",
-				color: "#666",
-				weight: 1,
-				opacity: 0.8,
-				fillOpacity: 0.5
-			};
-
-      var averageMarkerOptions = {
-				radius: 4,
-				fillColor: "#7800ff",
-				color: "#666",
-				weight: 1,
-				opacity: 0.8,
-				fillOpacity: 0.5
-			};
-
-
       var map = L.map('map').setView([40, -6], 3);
       L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(map);
+
+      var allPointsGeoJSON = <%= geo_json %>;
+
+      var ciaranPoints = getSpecialPoints(allPointsGeoJSON, "ciaran");
+      //var ciaranPoints = <%# instances["ciaran"] %>;
 
       var step;
       var ciaranRollingLineCoordinates = [];
@@ -109,20 +103,6 @@
 			L.Marker.movingMarker(ciaranRollingLatLng, animationSteps, {autostart: true, loop: true}).addTo(map);
 
     </script>
-
-    <p>Geographical calculations done with the suprisingly flexible and
-      friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
-      Animated markers courtesy of Leaflet&rsquo;s <a
-        href="https://github.com/ewoken/Leaflet.MovingMarker"
-        target="_blank">MovingMarker</a> extension. Data is by Moacir P. de S&aacute;
-      Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
-        target="_blank">NYWalker</a>. The faint circles represent instances
-      mentioned in the text, and each is connected to a line segment on the
-      cumulative line by a faint grey line.</p>
-    
-      <p>This is part of an instance of &ldquo;everyday criticism.&rdquo; Experimentation
-        is part of everyday criticism, and this was easier and more fun than
-        fighting with python and ArcGIS.</p>
 
   </body>
 </html>
