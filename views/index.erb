@@ -59,43 +59,38 @@
       var overlay = {};
 
       var allPointsGeoJSON = <%= geo_json %>;
+      var colors = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'];
       <% specials.each do |special| %>
-        var <%= special.sub(/ /, "") %>Points = getSpecialPoints(allPointsGeoJSON, "<%= special %>");
-        var <%= special.sub(/ /, "") %>RunningPoints = getRunningPoints(<%= special.sub(/ /, "") %>Points);
-        var <%= special.sub(/ /, "") %>RunningLine = getRunningLine(<%= special.sub(/ /, "") %>Points);
-        var <%= special.sub(/ /, "") %>AccumulatorPoints = getAccumulatorPoints(<%= special.sub(/ /, "") %>Points);
-        var <%= special.sub(/ /, "") %>AccumulatorLine = getAccumulatorLine(<%= special.sub(/ /, "") %>Points);
-        var <%= special.sub(/ /, "") %>RunningLineLayer = L.geoJson(<%= special.sub(/ /, "") %>RunningLine, {style: {"color": "#adaada", "weight": 3, "opacity": 0.75}});
-        var <%= special.sub(/ /, "") %>RunningPointsLayer = L.geoJson(<%= special.sub(/ /, "") %>RunningPoints, {
-          pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.popup);
-          }
-        });
-        var <%= special.sub(/ /, "") %>AccumulatorLineLayer = L.geoJson(<%= special.sub(/ /, "") %>AccumulatorLine, {style: {"color": "#7800ff", "weight": 3, "opacity": 0.75}});
-        var <%= special.sub(/ /, "") %>AccumulatorPointsLayer = L.geoJson(<%= special.sub(/ /, "") %>AccumulatorPoints, {
-          pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, averageMarkerOptions);
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.popup);
-          }
-        });
-        var <%= special.sub(/ /, "") %>RunningLayer = L.layerGroup([<%= special.sub(/ /, "") %>RunningLineLayer, <%= special.sub(/ /, "") %>RunningPointsLayer]);
-        var <%= special.sub(/ /, "") %>AccumulatorLayer = L.layerGroup([<%= special.sub(/ /, "") %>AccumulatorLineLayer, <%= special.sub(/ /, "") %>AccumulatorPointsLayer]);
-        //var animationSteps = <%= special.sub(/ /, "") %>Points.map(function(){
-        //  return 100;
-        //});
-        //L.Marker.movingMarker(L.geoJson(<%= special.sub(/ /, "") %>AccumulatorLine), animationSteps, {autostart: true, loop: true}).addTo(map);
-        //L.Marker.movingMarker(L.geoJson(<%= special.sub(/ /, "") %>RunningLine), animationSteps, {autostart: true, loop: true}).addTo(map);
-
-        overlay["<%= special.capitalize %> running center"] = <%= special.sub(/ /, "") %>RunningLayer;
-        overlay["<%= special.capitalize %> cumulative center"] = <%= special.sub(/ /, "") %>AccumulatorLayer;
+        var <%= special.sub(/ /, "") %> = { text: "<%= special %>", name: "<%= special.capitalize %>" };
       <% end %>
-      L.control.layers(null, overlay).addTo(map);
+      var instances = { special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>] };
+      instances.special.forEach(function(item, index) {
+        item.color = colors[index];
+        item.shadeColor = shadeColor2(item.color, -0.20);
+        item.points = getSpecialPoints(allPointsGeoJSON, item.text);
+        item.runningLineLayer = L.geoJson(getRunningLine(item.points), { style: { "color": item.shadeColor, "weight": 3, "opacity": 0.9 } });
+        item.accumulatorLineLayer = L.geoJson(getAccumulatorLine(item.points), { style: { "color": item.color, "weight": 3, "opacity": 0.9 } });
+        item.runningPointsLayer = L.geoJson(getRunningPoints(item.points), {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, { radius: 4, fillColor: item.shadeColor, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+          },
+          onEachFeature: function(feature, layer) {
+            layer.bindPopup(feature.popup);
+          }
+        });
+        item.accumulatorPointsLayer = L.geoJson(getAccumulatorPoints(item.points), {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, { radius: 4, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+          },
+          onEachFeature: function(feature, layer) {
+            layer.bindPopup(feature.popup);
+          }
+        });
+        overlay[item.name + " running center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
+        overlay[item.name + " accumulator center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
+      });
 
+      L.control.layers(null, overlay).addTo(map);
 
     </script>
 
