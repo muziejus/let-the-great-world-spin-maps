@@ -28,6 +28,7 @@ PLATFORMS
 
 DEPENDENCIES
   httparty
+  rack
   shotgun
   sinatra
   thin
