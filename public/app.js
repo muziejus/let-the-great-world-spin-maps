@@ -8,17 +8,19 @@ function getAccumulatorLine(points) {
 }
 
 function getAccumulatorArray(points, option) {
-  var step; var centroid; var pointsArray;
+  var centroid; var pointsArray;
   var centroidArray = [];
   pointsArray = [points[0], points[1]]; // Because we start w/ step 3.
-  for (step = 2; step < points.length; step += 1) {
-    pointsArray.push(points[step]);
-    centroid = turf.centroid({"type": "FeatureCollection", "features": pointsArray});
-    if (option === "points") {
-      centroid.popup = "Text: " + points[step].properties.text + "; page: " + points[step].properties.page;
+  points.forEach(function(item, index) {
+    if (index > 1) {
+      pointsArray.push(item);
+      centroid = turf.centroid({"type": "FeatureCollection", "features": pointsArray});
+      if (option === "points") {
+        centroid.popup = "Text: " + item.properties.text + "; page: " + item.properties.page;
+      }
+      centroidArray.push(centroid);
     }
-    centroidArray.push(centroid);
-  }
+  });
   return centroidArray;
 }
 
@@ -32,16 +34,18 @@ function getRunningLine(points) {
 }
 
 function getRunningArray(points, option) {
-  var step; var centroid;
+  var centroid;
   var centroidArray = [];
-  for (step = 2; step < (points.length - 2); step += 1) {
-    runningArray = [points[step - 2], points[step -1], points[step], points[step + 1], points[step + 2]];
-    centroid = turf.centroid({"type": "FeatureCollection", "features": runningArray});
-    if (option === "points") {
-      centroid.popup = "Text: " + points[step].properties.text + "; page: " + points[step].properties.page;
+  points.forEach(function(item, index) {
+    if (index > 1 && index < points.length - 2) {
+      runningArray = [points[index - 2], points[index -1], item, points[index + 1], points[index + 2]];
+      centroid = turf.centroid({"type": "FeatureCollection", "features": runningArray});
+      if (option === "points") {
+        centroid.popup = "Text: " + item.properties.text + "; page: " + item.properties.page;
+      }
+      centroidArray.push(centroid);
     }
-    centroidArray.push(centroid);
-  }
+  });
   return centroidArray;
 }
 
