@@ -48,8 +48,10 @@ function getRunningArray(points, option) {
 function getSpecialPoints(points, specialText) {
    var returnPoints = [];
    points.features.forEach(function (item, index) {
-     if (item.properties.special === specialText) {
-       returnPoints.push(item);
+     if (item.properties.place_properties.confidence > 0) {
+       if (item.properties.special === specialText) {
+         returnPoints.push(item);
+       }
      }
    });
   return returnPoints;
