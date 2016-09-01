@@ -112,7 +112,7 @@
             layer.bindPopup(feature.popup);
           }
         });
-        instances.overlay[item.name + " running center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
+        instances.overlay[item.name + " rolling center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
         instances.overlay[item.name + " accumulator center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
         instances.centers.addLayer(item.weightedCenterLayer);
       });
