@@ -26,102 +26,125 @@
       <h2>5-instance rolling and cumulative mean centers of each POV of the novel.</h2>
       <div id="map"></div>
 
-      <p>The automatically showing layer is the mean center of each POV.
-        Clicking on a circle will reveal which of the 12 POVs is represented.
-        The layer menu (top right corner) reveals the 5-instance rolling and
-        cumulative mean centers, respectively, of each POV.</p>
+      <div class="row">
+        <div class="col-md-6">
+          <h3>What is going on here?</h3>
 
-      <p>Both sets of data show, then, how the geographical
-        &ldquo;center&rdquo; of the novel moves over narrative time. For
-        example, Ciaran&rsquo;s POV shows a general movement from Dublin to
-        NYC, stopping somewhere over the Atlantic, which fits the tone of his
-        section of the novel (the first full chapter). But on a 5-instance
-        rolling basis, we also see that Ciaran is all over the place,
-        persistently thinking or mentioning places not in NYC well after moving
-        there.</p>
+          <p>The automatically showing layer is the mean center of each POV.
+            Clicking on a circle will reveal which of the 12 POVs is represented.
+            The layer menu (top right corner) reveals the 5-instance rolling and
+            cumulative mean centers, respectively, of each POV.</p>
 
-      <p>Geographical calculations done with the suprisingly flexible and
-        friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
-        Currently disabled animated markers courtesy of Leaflet&rsquo;s <a
-          href="https://github.com/ewoken/Leaflet.MovingMarker"
-          target="_blank">MovingMarker</a> extension. Data is by Moacir P. de S&aacute;
-        Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
-          target="_blank">NYWalker</a>. The faint circles represent instances
-        mentioned in the text, and each is connected to a line segment on the
-        cumulative line by a faint grey line.</p>
-    
-      <p>This is part of an instance of &ldquo;everyday criticism.&rdquo; Experimentation
-        is part of everyday criticism, and this was easier and more fun than
-        fighting with python and ArcGIS.</p>
-    </div>
+          <p>Clicking on the newly revealed moving mean centers shows you for
+            which instance (and on which page) that calculation was added. This
+            can be confusing in the rolling mean center, because it may
+            suddenly jump southeastward, making it look like a very
+            southeasterly place (Sydney, for example) was mentioned. However,
+            the 5-instance rolling mean center calculates the mean center of
+            the instance under observation, the two instances before, and the
+            two instances after. A sudden jump towards Australia means that in
+            two instances we will probably see one that is for a place in
+            Australia. This can be confusing, but I think it is a fairer
+            representation of a rolling mean.</p>
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
-		<script src="/vendor/MovingMarker.js"></script>
-    <script src="https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js"></script>
-    <script src="/app.js"></script>
+          <p>Both sets of data show, then, how the geographical
+            &ldquo;center&rdquo; of the novel moves over narrative time. For
+            example, Ciaran&rsquo;s POV shows a general movement from Dublin to
+            NYC, stopping somewhere over the Atlantic, which fits the tone of his
+            section of the novel (the first full chapter). But on a 5-instance
+            rolling basis, we also see that Ciaran is all over the place,
+            persistently thinking or mentioning places not in NYC well after moving
+            there.</p>
 
-    <script>
-      var map = L.map('map').setView([40, -6], 3);
-      L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(map);
+        </div>
+        <div class="col-md-6">
+          <h3>How was this made?</h3>
 
-      var allPointsGeoJSON = <%= geo_json %>;
-      var colors = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'];
-      <% specials.each do |special| %>
-        var <%= special.sub(/ /, "") %> = { text: "<%= special %>", name: "<%= special.capitalize %>" };
-      <% end %>
-      var instances = { 
-        special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>],
-        overlay: {},
-        //overlay: {"All weighted centers": this.centers},
-        centers: L.layerGroup([])
-      };
-      instances.special.forEach(function(item, index) {
-        item.color = colors[index];
-        item.shadeColor = shadeColor2(item.color, -0.20);
-        item.points = getSpecialPoints(allPointsGeoJSON, item.text);
-        item.runningLineLayer = L.geoJson(getRunningLine(item.points), { style: { "color": item.shadeColor, "weight": 3, "opacity": 0.9 } });
-        item.accumulatorLineLayer = L.geoJson(getAccumulatorLine(item.points), { style: { "color": item.color, "weight": 3, "opacity": 0.9 } });
-        item.weightedCenterLayer = L.geoJson(turf.centroid({ "type": "FeatureCollection", "features": item.points }), {
-          pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, { radius: 8, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(item.name + " center");
-          }
+          <p>Geographical calculations done with the suprisingly flexible and
+            friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
+            Currently disabled animated markers courtesy of Leaflet&rsquo;s <a
+              href="https://github.com/ewoken/Leaflet.MovingMarker"
+              target="_blank">MovingMarker</a> extension. Data is by <a
+              href="http://moacir.com/" target="_blank">Moacir P. de S&aacute;
+              Pereira</a> of the <a href="http://english.fas.nyu.edu/"
+              target="_blank">NYU English Department</a> and taken from <a
+              href="http://nywalker.newyorkscapes.org"
+              target="_blank">NYWalker</a>, a <a
+              href="http://newyorkscapes.org" target="_blank">NewYorkScapes</a>
+            and #NYUDH joint.</p>
+        
+          <p>This is part of an instance of &ldquo;everyday criticism.&rdquo; Experimentation
+            is part of everyday criticism, and this was easier and more fun than
+            fighting with python and ArcGIS.</p>
+        </div>
+      </div>
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+      <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+      <script src="/vendor/MovingMarker.js"></script>
+      <script src="https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js"></script>
+      <script src="/app.js"></script>
+
+      <script>
+        var map = L.map('map').setView([40, -6], 3);
+        L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }).addTo(map);
+
+        var allPointsGeoJSON = <%= geo_json %>;
+        var colors = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'];
+        <% specials.each do |special| %>
+          var <%= special.sub(/ /, "") %> = { text: "<%= special %>", name: "<%= special.capitalize %>" };
+        <% end %>
+        var instances = { 
+          special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>],
+          overlay: {},
+          //overlay: {"All weighted centers": this.centers},
+          centers: L.layerGroup([])
+        };
+        instances.special.forEach(function(item, index) {
+          item.color = colors[index];
+          item.shadeColor = shadeColor2(item.color, -0.15);
+          item.points = getSpecialPoints(allPointsGeoJSON, item.text);
+          item.runningLineLayer = L.geoJson(getRunningLine(item.points), { style: { "color": item.shadeColor, "weight": 2, "opacity": 0.8 } });
+          item.accumulatorLineLayer = L.geoJson(getAccumulatorLine(item.points), { style: { "color": item.color, "weight": 3, "opacity": 0.9 } });
+          item.weightedCenterLayer = L.geoJson(turf.centroid({ "type": "FeatureCollection", "features": item.points }), {
+            pointToLayer: function(feature, latlng) {
+              return L.circleMarker(latlng, { radius: 8, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+            },
+            onEachFeature: function(feature, layer) {
+              layer.bindPopup("<h4>" + item.name + " center</h4>");
+            }
+          });
+          item.runningPointsLayer = L.geoJson(getRunningPoints(item.points), {
+            pointToLayer: function(feature, latlng) {
+              return L.circleMarker(latlng, { radius: 3, fillColor: item.shadeColor, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+            },
+            onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.popup);
+            }
+          });
+          item.accumulatorPointsLayer = L.geoJson(getAccumulatorPoints(item.points), {
+            pointToLayer: function(feature, latlng) {
+              return L.circleMarker(latlng, { radius: 4, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+            },
+            onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.popup);
+            }
+          });
+          instances.overlay[item.name + " rolling mean center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
+          instances.overlay[item.name + " cumulative mean center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
+          instances.centers.addLayer(item.weightedCenterLayer);
         });
-        item.runningPointsLayer = L.geoJson(getRunningPoints(item.points), {
-          pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, { radius: 4, fillColor: item.shadeColor, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.popup);
-          }
-        });
-        item.accumulatorPointsLayer = L.geoJson(getAccumulatorPoints(item.points), {
-          pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, { radius: 4, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
-          },
-          onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.popup);
-          }
-        });
-        instances.overlay[item.name + " rolling center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
-        instances.overlay[item.name + " accumulator center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
-        instances.centers.addLayer(item.weightedCenterLayer);
-      });
 
-      L.control.layers(null, instances.overlay).addTo(map);
-      instances.centers.addTo(map);
-      
-
-    </script>
+        L.control.layers(null, instances.overlay).addTo(map);
+        instances.centers.addTo(map);
+        
+      </script>
 
   </body>
 </html>
