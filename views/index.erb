@@ -22,12 +22,27 @@
   </head>
   <body>
     <div class="container">
-      <h1>Five instance rolling average (blue) and cumulative average of instances in the Ciaran section of <em>Let the Great World Spin</em></h1>
-      <h2>The two markers show the changes in the averages over narrative time.</h2>
+      <h1>Maps of <em>Let the Great World Spin</em></h1>
+      <h2>5-instance rolling and cumulative mean centers of each POV of the novel.</h2>
       <div id="map"></div>
+
+      <p>The automatically showing layer is the mean center of each POV.
+        Clicking on a circle will reveal which of the 12 POVs is represented.
+        The layer menu (top right corner) reveals the 5-instance rolling and
+        cumulative mean centers, respectively, of each POV.</p>
+
+      <p>Both sets of data show, then, how the geographical
+        &ldquo;center&rdquo; of the novel moves over narrative time. For
+        example, Ciaran&rsquo;s POV shows a general movement from Dublin to
+        NYC, stopping somewhere over the Atlantic, which fits the tone of his
+        section of the novel (the first full chapter). But on a 5-instance
+        rolling basis, we also see that Ciaran is all over the place,
+        persistently thinking or mentioning places not in NYC well after moving
+        there.</p>
+
       <p>Geographical calculations done with the suprisingly flexible and
         friendly <a href="http://turfjs.org" target="_blank">Turf.js</a>.
-        Animated markers courtesy of Leaflet&rsquo;s <a
+        Currently disabled animated markers courtesy of Leaflet&rsquo;s <a
           href="https://github.com/ewoken/Leaflet.MovingMarker"
           target="_blank">MovingMarker</a> extension. Data is by Moacir P. de S&aacute;
         Pereira and taken from <a href="http://nywalker.newyorkscapes.org"
