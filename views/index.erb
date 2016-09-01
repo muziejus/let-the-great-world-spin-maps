@@ -56,20 +56,31 @@
         maxZoom: 19
       }).addTo(map);
 
-      var overlay = {};
-
       var allPointsGeoJSON = <%= geo_json %>;
       var colors = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'];
       <% specials.each do |special| %>
         var <%= special.sub(/ /, "") %> = { text: "<%= special %>", name: "<%= special.capitalize %>" };
       <% end %>
-      var instances = { special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>] };
+      var instances = { 
+        special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>],
+        overlay: {},
+        //overlay: {"All weighted centers": this.centers},
+        centers: L.layerGroup([])
+      };
       instances.special.forEach(function(item, index) {
         item.color = colors[index];
         item.shadeColor = shadeColor2(item.color, -0.20);
         item.points = getSpecialPoints(allPointsGeoJSON, item.text);
         item.runningLineLayer = L.geoJson(getRunningLine(item.points), { style: { "color": item.shadeColor, "weight": 3, "opacity": 0.9 } });
         item.accumulatorLineLayer = L.geoJson(getAccumulatorLine(item.points), { style: { "color": item.color, "weight": 3, "opacity": 0.9 } });
+        item.weightedCenterLayer = L.geoJson(turf.centroid({ "type": "FeatureCollection", "features": item.points }), {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, { radius: 8, fillColor: item.color, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
+          },
+          onEachFeature: function(feature, layer) {
+            layer.bindPopup(item.name + " center");
+          }
+        });
         item.runningPointsLayer = L.geoJson(getRunningPoints(item.points), {
           pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng, { radius: 4, fillColor: item.shadeColor, color: "#666", weight: 1, opacity: 0.8, fillOpacity: 0.8 });
@@ -86,11 +97,14 @@
             layer.bindPopup(feature.popup);
           }
         });
-        overlay[item.name + " running center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
-        overlay[item.name + " accumulator center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
+        instances.overlay[item.name + " running center"] = L.layerGroup([item.runningLineLayer, item.runningPointsLayer]);
+        instances.overlay[item.name + " accumulator center"] = L.layerGroup([item.accumulatorLineLayer, item.accumulatorPointsLayer]);
+        instances.centers.addLayer(item.weightedCenterLayer);
       });
 
-      L.control.layers(null, overlay).addTo(map);
+      L.control.layers(null, instances.overlay).addTo(map);
+      instances.centers.addTo(map);
+      
 
     </script>
 
