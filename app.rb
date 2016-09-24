@@ -9,7 +9,7 @@ class App < Sinatra::Base
   set :default_encoding, 'utf-8'
 
   get "/" do
-    json = HTTParty.get("http://nywalker.newyorkscapes.org/books/let-the-great-world-spin-2009/geojson-instances").body
+    json = HTTParty.get("http://nywalker.newyorkscapes.org/books/let-the-great-world-spin-2009/instances-geojson").body
     instances = {}
     specials = ["intro", "ciaran", "claire", "lara", "walker", "fernando", "the kid", "tillie", "solomon", "adelita", "gloria", "jaslyn"]
     # This causes an encoding error when it goes over to the erb.
