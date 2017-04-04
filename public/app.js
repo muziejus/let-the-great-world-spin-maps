@@ -17,6 +17,7 @@ function getAccumulatorArray(points, option) {
       centroid = turf.centroid({"type": "FeatureCollection", "features": pointsArray});
       if (option === "points") {
         centroid.popup = "Text: " + item.properties.text + "; page: " + item.properties.page;
+        centroid.tooltip = item.properties.text + ", p. " + item.properties.page;
       }
       centroidArray.push(centroid);
     }
