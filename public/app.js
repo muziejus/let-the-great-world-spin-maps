@@ -16,8 +16,8 @@ function getAccumulatorArray(points, option) {
       pointsArray.push(item);
       centroid = turf.centroid({"type": "FeatureCollection", "features": pointsArray});
       if (option === "points") {
-        centroid.popup = "Text: " + item.properties.text + "; page: " + item.properties.page;
-        centroid.tooltip = item.properties.text + ", p. " + item.properties.page;
+        centroid.popup = "Name: " + item.properties.attestedName + "; page: " + item.properties.page;
+        centroid.tooltip = item.properties.attestedName + ", p. " + item.properties.page;
       }
       centroidArray.push(centroid);
     }
@@ -50,16 +50,35 @@ function getRunningArray(points, option) {
   return centroidArray;
 }
 
-function getSpecialPoints(points, specialText) {
-   var returnPoints = [];
-   points.features.forEach(function (item, index) {
-     if (item.properties.place_properties.confidence > 0) {
-       if (item.properties.special === specialText) {
-         returnPoints.push(item);
-       }
-     }
-   });
-  return returnPoints;
+function getSpecialPoints(entries, special) {
+  const unsortedPoints = entries.filter(e => e.properties.special === special && e.confidence > 0).map(e => {
+    return {
+      attestedName: e.attested_name,
+      page: e.properties.page,
+      sequence: e.properties.sequence,
+      name: e.name,
+      latitude: e.latitude,
+      longitude: e.longitude
+    }
+  });
+  // const points = {"type": "FeatureCollection"};
+  // points["features"] = _.sortBy(unsortedPoints, ["page", "sequence"]).map(e => {
+  return _.sortBy(unsortedPoints, ["page", "sequence"]).map(e => {
+    return {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [e.longitude, e.latitude]
+      },
+      "properties": {
+        "name": e.name,
+        "attestedName": e.attestedName,
+        "special": special,
+        "page": e.page,
+        "sequence": e.sequence
+      }
+    }
+  });
 }
 
 // from http://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors

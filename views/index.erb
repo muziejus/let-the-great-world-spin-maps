@@ -39,7 +39,7 @@
             tightrope walker, never named, in the novel. I have collapsed those
             two sections into one.</p>
 
-          <p>The automatically showing layer is the mean center of each POV.
+          <p>The automatically showing layer is the <a href="https://support.esri.com/en/other-resources/gis-dictionary/term/5d54a903-1839-4687-bb77-92441e72a209">mean center</a> of each POV.
             Clicking on a circle will reveal which of the 12 POVs is represented.
             The layer menu (top right corner) reveals the 5-instance rolling and
             cumulative mean centers, respectively, of each POV.</p>
@@ -96,9 +96,10 @@
       <!-- Latest compiled and minified JavaScript -->
       <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
       <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
-      <script src="/vendor/MovingMarker.js"></script>
       <script src="https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js"></script>
+      <script src="/ltgws-data.js"></script>
       <script src="/app.js"></script>
 
       <script>
@@ -109,13 +110,14 @@
           maxZoom: 19
         }).addTo(map);
 
-        var allPointsGeoJSON = <%= geo_json %>;
         var colors = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'];
-        <% specials.each do |special| %>
-          var <%= special.sub(/ /, "") %> = { text: "<%= special %>", name: "<%= special.capitalize %>" };
-        <% end %>
+				const specials = ["intro", "ciaran", "claire", "lara", "walker", "fernando", "the kid", "tillie", "solomon", "adelita", "gloria", "jaslyn"];
+				const instanceHash = {};
+				const special = specials.map(s => {
+					return { text: s, name: s };
+				});
         var instances = { 
-          special: [<%= specials.join(",").sub(/ /, "").gsub(/,/, ", ") %>],
+          special,
           overlay: {},
           //overlay: {"All weighted centers": this.centers},
           centers: L.layerGroup([])
@@ -123,7 +125,7 @@
         instances.special.forEach(function(item, index) {
           item.color = colors[index];
           item.shadeColor = shadeColor2(item.color, -0.15);
-          item.points = getSpecialPoints(allPointsGeoJSON, item.text);
+          item.points = getSpecialPoints(ltgwsData, item.text);
           item.runningLineLayer = L.geoJson(getRunningLine(item.points), { style: { "color": item.shadeColor, "weight": 2, "opacity": 0.8 } });
           item.accumulatorLineLayer = L.geoJson(getAccumulatorLine(item.points), { style: { "color": item.color, "weight": 3, "opacity": 0.9 } });
           item.weightedCenterLayer = L.geoJson(turf.centroid({ "type": "FeatureCollection", "features": item.points }), {
